@@ -1,0 +1,79 @@
+master:
+  image: docker.io/redis
+  container_name: redis_master
+  ports:
+    - 6379:6379
+  command: redis-server --requirepass 123456
+
+slave1:
+  image: redis_slave
+  container_name: redis_slave_1 
+  command: --port 6380:6379
+  environment:
+    - SLAVE_REQUIREPASS=123456
+    - SLAVE_MASTER_AUTH=123456
+  ports:
+    - 6380:6379
+  links:
+    - master:redis-master
+
+slave2:
+  image: redis_slave
+  container_name: redis_slave_2
+  command: --port 6381:6379
+  environment:
+    - SLAVE_REQUIREPASS=123456
+    - SLAVE_MASTER_AUTH=123456
+  ports:
+    - 6381:6379
+  links:
+    - master:redis-master
+
+sentinel1:
+  image: redis_sentinel
+  container_name: redis_sentinel_1
+  ports: 
+    - 26379:26379
+  command: redis-sentinel --port 26379:26379
+  environment:
+    - SENTINEL_DOWN_AFTER=5000
+    - SENTINEL_FAILOVER=5000
+    - SENTINEL_MASTER_AUTH=123456
+    - SENTINEL_REQUIREPASS=123456
+  links:
+    - master:redis-master
+    - slave1
+    - slave2
+
+sentinel2:
+  image: redis_sentinel
+  container_name: redis_sentinel_2
+  ports:
+    - 26380:26379
+  command: redis-sentinel --port 26380:26379
+  environment:
+    - SENTINEL_DOWN_AFTER=5000
+    - SENTINEL_FAILOVER=5000
+    - SENTINEL_MASTER_AUTH=123456
+    - SENTINEL_REQUIREPASS=123456
+  links:
+    - master:redis-master
+    - slave1
+    - slave2
+
+sentinel3:
+  image: redis_sentinel
+  container_name: redis_sentinel_3
+  ports:
+    - 26381:26379
+  command: redis-sentinel --port 26381:26379
+  environment:
+    - SENTINEL_DOWN_AFTER=5000
+    - SENTINEL_FAILOVER=5000
+    - SENTINEL_MASTER_AUTH=123456
+    - SENTINEL_REQUIREPASS=123456
+  links:
+    - master:redis-master
+    - slave1
+    - slave2
+
